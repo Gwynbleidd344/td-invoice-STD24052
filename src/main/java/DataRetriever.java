@@ -1,3 +1,4 @@
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -148,6 +149,34 @@ public class DataRetriever {
                 taxSummaries.add(taxSummary);
             }
             return taxSummaries;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public  BigDecimal computeWeightedTurnoverTtc() {
+        DBConnection conn = new DBConnection();
+        String sql = """
+                    SELECT SUM(
+                    CASE
+                        WHEN i.status = 'PAID' THEN (il.quantity * il.unit_price) * (1 + tc.rate / 100)
+                        WHEN i.status = 'CONFIRMED' THEN ((il.quantity * il.unit_price) * 0.5) * (1 + tc.rate / 100)
+                        ELSE 0
+                    END
+                ) as weighted_total_ttc
+                FROM invoice i
+                JOIN invoice_line il ON i.id = il.invoice_id
+                JOIN tax_config tc ON tc.label = 'TVA STANDARD';
+                                """;
+        BigDecimal weightedTotalTtc = BigDecimal.ZERO;
+        try {
+            PreparedStatement ps = conn.getConnection().prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                weightedTotalTtc = rs.getBigDecimal("weighted_total_ttc");
+            }
+            return weightedTotalTtc;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
