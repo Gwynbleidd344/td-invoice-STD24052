@@ -1,4 +1,4 @@
-INSERT INTO invoice (customer_name, status) VALUES
+INSERT INTO invoice (id,customer_name, status) VALUES
 (1, 'Alice', 'CONFIRMED'),
 (2, 'Bob', 'PAID'),
 (3, 'Charlie', 'DRAFT');

@@ -1,3 +1,5 @@
+CREATE DATABASE invoice_db;
+
 CREATE TYPE invoice_status AS ENUM('DRAFT', 'CONFIRMED', 'PAID');
 
 CREATE TABLE invoice (
@@ -11,4 +13,4 @@ invoice_id INT NOT NULL REFERENCES invoice(id),
 label VARCHAR NOT NULL,
 quantity INT NOT NULL,
 unit_price NUMERIC(10,2) NOT NULL
-)
+);
