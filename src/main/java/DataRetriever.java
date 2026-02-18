@@ -76,13 +76,43 @@ public class DataRetriever {
         try {
             PreparedStatement ps = conn.getConnection().prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
-            
+
             while (rs.next()) {
                 statusTotals.setTotalPaid(rs.getDouble("total_paid"));
                 statusTotals.setTotalConfirmed(rs.getDouble("total_confirmed"));
                 statusTotals.setTotalDraft(rs.getDouble("total_draft"));
             }
             return statusTotals;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Double computeWeightedTurnover() {
+        DBConnection conn = new DBConnection();
+
+        String sql = """
+                    SELECT SUM(
+                    CASE
+                        WHEN i.status = 'PAID' THEN il.quantity * il.unit_price
+                        WHEN i.status = 'CONFIRMED' THEN (il.quantity * il.unit_price) * 0.5
+                        ELSE 0
+                    END
+                ) as weighted_total
+                FROM invoice i
+                JOIN invoice_line il ON i.id = il.invoice_id;
+                                """;
+
+        try {
+            PreparedStatement ps = conn.getConnection().prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            
+            Double wheightedTotal = 0.0;
+
+            while (rs.next()) {
+                wheightedTotal = rs.getDouble("weighted_total");
+            }
+            return wheightedTotal;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
