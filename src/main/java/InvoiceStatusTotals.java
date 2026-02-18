@@ -1,5 +1,3 @@
-import java.math.BigDecimal;
-
 public class InvoiceStatusTotals {
     private Double totalPaid;
     private Double totalConfirmed;
